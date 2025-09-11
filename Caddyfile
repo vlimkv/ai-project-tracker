@@ -1,0 +1,14 @@
+panel.example.com {
+	encode zstd gzip
+	reverse_proxy web:3000
+}
+
+api.example.com {
+	encode zstd gzip
+	reverse_proxy backend:8000
+}
+
+# (опц.) редирект со всего HTTP на HTTPS
+http://panel.example.com, http://api.example.com {
+	redir https://{host}{uri}
+}

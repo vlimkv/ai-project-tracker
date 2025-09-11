@@ -1,0 +1,83 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TZ: ${TZ}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+
+  llm:
+    image: ghcr.io/ggerganov/llama.cpp:server
+    restart: unless-stopped
+    command: >
+      --host 0.0.0.0
+      --port 8080
+      -m /root/.cache/llama.cpp/Qwen_Qwen2.5-3B-Instruct-GGUF_qwen2.5-3b-instruct-q4_k_m.gguf
+      --cache-reuse --parallel 1 --ctx-size 4096 --batch-size 256
+    volumes:
+      - llama_cache:/root/.cache/llama.cpp
+
+  backend:
+    image: ghcr.io/${GH_OWNER}/ai-project-tracker-backend:${IMAGE_TAG}
+    restart: unless-stopped
+    env_file: .env.prod
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    expose:
+      - "8000"
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  web:
+    image: ghcr.io/${GH_OWNER}/ai-project-tracker-web:${IMAGE_TAG}
+    restart: unless-stopped
+    env_file: .env.prod
+    depends_on:
+      - backend
+    expose:
+      - "3000"
+
+  bot:
+    image: ghcr.io/${GH_OWNER}/ai-project-tracker-bot:${IMAGE_TAG}
+    restart: unless-stopped
+    env_file: .env.prod
+    depends_on:
+      - backend
+      - redis
+    environment:
+      API_BASE: http://backend:8000
+
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - backend
+
+volumes:
+  pgdata:
+  llama_cache:
+  caddy_data:
+  caddy_config:

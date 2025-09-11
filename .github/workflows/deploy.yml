@@ -1,0 +1,53 @@
+name: CD (deploy to VPS)
+
+on:
+  workflow_run:
+    workflows: ["CI (build & push images)"]
+    types: [ "completed" ]
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+
+    env:
+      REGISTRY: ghcr.io
+      GH_OWNER: ${{ vars.GH_OWNER }}
+      SERVER_PROJECT_DIR: ${{ vars.SERVER_PROJECT_DIR }}
+      IMAGE_TAG: latest 
+
+    steps:
+      - name: Connect & deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            echo "Login GHCR..."
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+            echo "Switch to project dir..."
+            cd "${SERVER_PROJECT_DIR}"
+
+            echo "Export deployment vars..."
+            export GH_OWNER="${{ env.GH_OWNER }}"
+            export IMAGE_TAG="${{ env.IMAGE_TAG }}"
+
+            echo "Pull images..."
+            docker compose -f docker-compose.prod.yml pull
+
+            echo "Up containers..."
+            docker compose -f docker-compose.prod.yml up -d
+
+            echo "Prune old images..."
+            docker image prune -f
+
+            echo "Health checks..."
+
+            docker compose exec -T backend wget -qO- http://127.0.0.1:8000/health || (docker compose logs --no-log-prefix backend && false)

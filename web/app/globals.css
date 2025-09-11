@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+:root { color-scheme: light dark; }
+html, body { height: 100%; }
+* { outline: none; }
+:focus-visible { @apply ring-2 ring-black/10 dark:ring-white/20 rounded-md; }
+
+.bg-grid {
+  background-image:
+    radial-gradient(24rem 24rem at 50% -8rem, rgba(56,189,248,.25), transparent 60%),
+    conic-gradient(from 180deg at 50% 120%, rgba(167,139,250,.15), transparent 45%);
+}

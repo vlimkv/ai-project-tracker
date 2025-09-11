@@ -1,0 +1,63 @@
+name: CI (build & push images)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  GH_OWNER: ${{ vars.GH_OWNER }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker login (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build & push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-backend:latest
+            ${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-backend:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-backend:cache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-backend:cache,mode=max
+
+      - name: Build & push web
+        uses: docker/build-push-action@v6
+        with:
+          context: ./web
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-web:latest
+            ${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-web:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-web:cache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-web:cache,mode=max
+
+      - name: Build & push bot
+        uses: docker/build-push-action@v6
+        with:
+          context: ./bot
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-bot:latest
+            ${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-bot:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-bot:cache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.GH_OWNER }}/ai-project-tracker-bot:cache,mode=max

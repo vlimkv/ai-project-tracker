@@ -56,7 +56,7 @@ graph TD
 **Clone & Configure**:
 
 ```bash
-git clone [https://github.com/vlimkv/ai-project-tracker.git](https://github.com/vlimkv/ai-project-tracker.git)
+git clone https://github.com/vlimkv/ai-project-tracker.git
 cp .env.example .env
 ```
 

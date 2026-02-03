@@ -75,7 +75,7 @@ docker compose up -d --build
 
 **LLM Stream**: http://localhost:8080/v1
 
-##⚙️ Environment Variables
+## ⚙️ Environment Variables
 
 The system is highly configurable via .env. Key parameters:
 

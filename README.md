@@ -1,18 +1,23 @@
 # AI Project Tracker (Self-Hosted LLM) 🧠
 
-**A full-stack task management ecosystem powered by local AI inference.**
+Task management system powered by a self-hosted LLM.
 
-This platform integrates a Telegram Bot, Web Dashboard, and a FastAPI backend to help users generate project roadmaps and track progress. Unlike standard wrappers, this project runs a **local LLM (Qwen 2.5 via llama.cpp)** completely offline/self-hosted using Docker.
+This project combines a Telegram bot, web dashboard, and FastAPI backend to generate project roadmaps and track progress.  
+Runs entirely offline using a local LLM (Qwen 2.5 via llama.cpp) — no external APIs required.
 
-![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)
-![Next.js](https://img.shields.io/badge/Next.js-black?style=flat&logo=next.js&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Orchestration-2496ED?style=flat&logo=docker&logoColor=white)
-![Llama.cpp](https://img.shields.io/badge/AI-Local_LLM-orange?style=flat)
+---
+
+## 🚀 Overview
+
+- Generates structured project roadmaps from user input using LLM  
+- Supports both Telegram bot and web interface  
+- Runs fully offline (self-hosted AI, no OpenAI dependency)  
+- Built with async backend and containerized architecture  
+- Designed for privacy, control, and low-latency inference  
+
+---
 
 ## 🏗 Architecture
-
-The system relies on a microservices-like architecture orchestrated via Docker Compose:
 
 ```mermaid
 graph TD
@@ -32,67 +37,119 @@ graph TD
     API --> Redis
     API -->|Prompt| LLM
     LLM -->|Stream| API
-```
+````
+
+---
 
 ## 🚀 Key Features
 
-**Self-Hosted Intelligence**: Uses llama.cpp server to run quantized models (GGUF) locally. No OpenAI API keys required.
-**Omnichannel**: Manage tasks via Telegram Bot (Aiogram 3) or Web Admin Panel (Next.js).
-**AI Generation**: Automatically breaks down a vague idea into 5-7 actionable technical tasks with acceptance criteria.
-**Reactive UI**: Real-time progress bars for AI generation on both Web and Telegram.
+### Self-Hosted AI
+
+Runs quantized LLM models (GGUF) locally via llama.cpp
+No OpenAI API keys required
+
+### Task Generation
+
+Transforms user ideas into 5–7 structured technical tasks
+
+### Multi-Platform Access
+
+* Telegram Bot (Aiogram 3)
+* Web Dashboard (Next.js)
+
+### Real-Time Feedback
+
+Streaming responses and progress updates
+
+---
 
 ## 🛠 Tech Stack
 
-**Frontend**: Next.js 14, Tailwind CSS (v4), TypeScript.
+**Backend**
 
-**Backend**: FastAPI, SQLAlchemy (Async), Pydantic.
+* FastAPI
+* SQLAlchemy (async)
+* Pydantic
 
-**AI Engine**: llama.cpp python server (OpenAI-compatible endpoint).
+**Frontend**
 
-**Infrastructure**: Docker, Docker Bake, Caddy (Reverse Proxy).
+* Next.js 14
+* TypeScript
+* Tailwind CSS
+
+**AI**
+
+* llama.cpp (OpenAI-compatible API)
+* Qwen 2.5 (GGUF models)
+
+**Infrastructure**
+
+* Docker / Docker Compose
+* Redis
+* PostgreSQL
+* Caddy
+
+---
 
 ## ⚡ Quick Start
 
-**Clone & Configure**:
+### Clone and configure
 
 ```bash
 git clone https://github.com/vlimkv/ai-project-tracker.git
 cp .env.example .env
 ```
 
-**Launch Ecosystem**:
+### Run system
 
 ```bash
-# This will download the LLM model (~2GB) on first run
+# Downloads model (~2GB on first run)
 docker compose up -d --build
 ```
 
-**Access Points**:
+---
 
-**Web UI**: http://localhost:3000
+## 🌐 Access
 
-**API Docs**: http://localhost:8000/docs
-
-**LLM Stream**: http://localhost:8080/v1
-
-## ⚙️ Environment Variables
-
-The system is highly configurable via .env. Key parameters:
-
-**AI_PROVIDER**: Set to oss for local llama.cpp or openai for cloud fallback.
-
-**OSS_MODEL**: Specify the HuggingFace model tag (default: qwen2.5-3b-instruct).
-
-**REDIS_URL**: For FSM state storage and AI response caching.
-
-## ⚠️ Requirements
-
-**Docker Desktop** installed.
-
-**RAM**: Minimum 4GB (8GB recommended for larger models).
-
-**GPU**: Optional (supports CPU inference via llama.cpp).
+* Web UI: [http://localhost:3000](http://localhost:3000)
+* API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+* LLM Endpoint: [http://localhost:8080/v1](http://localhost:8080/v1)
 
 ---
 
-Developed by Alimkhan Slambek. Architecture demonstrates secure, private AI integration pattern.
+## ⚙️ Environment
+
+* AI_PROVIDER — oss (local) or openai
+* OSS_MODEL — qwen2.5-3b-instruct
+* REDIS_URL — caching and state
+
+---
+
+## ⚠️ Requirements
+
+* Docker
+* 4GB RAM minimum (8GB recommended)
+* GPU optional
+
+---
+
+## 💡 Why this project
+
+Built to explore real-world LLM integration without external APIs.
+
+Focus:
+
+* self-hosted AI
+* async backend
+* full-stack system design
+
+---
+
+## 📌 Notes
+
+This project demonstrates:
+
+* local LLM deployment
+* AI + backend integration
+* full-stack architecture (bot + web + backend)
+* containerized development workflow
